@@ -44,8 +44,6 @@ class MyAudioProcessor extends AudioWorkletProcessor {
         return true;
       }
 
-      console.log(this.runtimeData)
-
       this.runtimeData.functions.processAudio(inputs, outputs, this.runtimeData.functions, this.runtimeData.globals);
       return true;
     }

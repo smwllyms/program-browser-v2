@@ -180,7 +180,7 @@ export default function f(code)
     code = " " + code + " ";
 
     // Note that both must start with whitespace or semicoloc on the left
-    const left = ["\\;", "\\s"];
+    const left = ["\\;", "\\s", "\\(", "\\["];
     // On the right, functions may have whitespace or the open parentheses
     const functionRight = ["\\s", "\\("];
     // On the right, globals may have whitespace or an operator

@@ -7,7 +7,6 @@
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
     "d3": "^7.8.5",
-    "emscripten-sdk": "^2.0.14-1",
     "fs-extra": "^11.2.0",
     "os-browserify": "^0.3.0",
     "path-browserify": "^1.0.1",
