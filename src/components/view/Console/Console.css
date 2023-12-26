@@ -1,0 +1,11 @@
+.console {
+    width: 100%;
+    margin: 0px;
+    
+}
+
+.console h2, p {
+
+    padding: 1px;
+    margin: 0px;
+}

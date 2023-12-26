@@ -1,70 +1,11 @@
 
 const types = ["float", "void", "int", "long", "double"];
 
-// export default async function(code, log)
-// {
-//     let stringCode = code;
-//     console.log(stringCode);
-//     // 1. Convert from CPP to JS
-
-//     let regex = new RegExp('\\s*(' + types.join('|') + ')\\s+(\\w+)\\s*\\((.*?)\\)\\s*{', 'gs');
-
-//     let matches = Array.from(stringCode.matchAll(regex));
-
-//     matches.forEach(match => {
-//     let type = match[1]; // The type of the function
-//     let name = match[2]; // The name of the function
-//     let params = match[3].split(',').map(param => param.trim()); // The parameters of the function
-//     console.log(`Found function ${name} of type ${type} with parameters: ${params}`);
-//     });
-
-//     // Functions
-//     // const regexKeys = new RegExp('^\\s*(' + keys.join('|') + ')\\s+(\\w+)\\s*\\(', 'gm');
-//     // const fKeys = Array.from(newCode.matchAll(regexKeys));
-//     // console.log(regexKeys)
-//     // fKeys.forEach(match => {
-//     //  let type = match[1]; // The type of the function
-//     //  let name = match[2]; // The name of the function
-//     //  console.log(`Found function ${name} of type ${type}`);
-//     // });
-
-    
-// }
-
-// export default async function(code, log)
-// {
-//     let types = ['float', 'int', 'void', 'double']; // Add or remove types as needed
-// let regexFuncStart = new RegExp('\\s*(' + types.join('|') + ')\\s+(\\w+)\\s*\\((.*?)\\)\\s*\\{', 'gs');
-// let stringCode = code.replace(/[\r\n]+/gm, " ").replace(/[\t ]+/gm, " "); // Your C++ code
-// console.log(stringCode)
-
-// let funcStartMatches = Array.from(stringCode.matchAll(regexFuncStart));
-
-// funcStartMatches.forEach(match => {
-//  let type = match[1]; // The type of the function
-//  let name = match[2]; // The name of the function
-//  let params = match[3].split(',').map(param => param.trim()); // The parameters of the function
-
-//  // Find the end of the function body
-//  let depth = 1;
-//  let bodyLines = [];
-//  while (depth > 0) {
-//  let index = stringCode.indexOf('\n', match.index);
-//  if (index === -1) break;
-//  let nextLine = stringCode.slice(match.index, index);
-//  bodyLines.push(nextLine);
-//  depth += (nextLine.match(/\{/) || []).length - (nextLine.match(/\}/) || []).length;
-//  match.index = index + 1;
-//  }
-
-//  let body = bodyLines.join('\n');
-//  console.log(`Found function ${name} of type ${type} with parameters: ${params}\n${body}`);
-// });
-
-// }
 export default function f(code)
 {
     // Very, very nonexpert way of doing this
+
+    try {
 
     // Remove comments
     code = code.replace(/\/\/.*\n/g, "\n");
@@ -244,5 +185,14 @@ export default function f(code)
     return {
         functions: functionInfo,
         globals: Object.keys(globals)
+    }
+
+    }
+    catch (e)
+    {
+        return {
+            error: true,
+            message: e
+        }
     }
 }

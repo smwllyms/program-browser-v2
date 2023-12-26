@@ -6,6 +6,7 @@ import { v4 } from "uuid"
 import Header from "./components/view/Header/Header.js"
 import DragNDrop from "./components/view/DragNDrop/DragNDrop.js"
 import Editor from "./components/view/Editor/Editor.js"
+import Console from "./components/view/Console/Console.js"
 
 import processorText from './util/audio-processor.js';
 
@@ -32,6 +33,7 @@ function App() {
   const [selected, setSelected] = React.useState("-1");
   const [pluginList, setPluginList] = React.useState([]);
   const [routes, setRoutes] = React.useState({});
+  const [consoleData, setConsoleData] = React.useState(null);
   
   const workletNodesRef = React.useRef({[destinationNode.id]:audioContext.destination});
   const buildRoutesFuncRef = React.useRef(null);
@@ -93,10 +95,25 @@ function App() {
         if (g.directives.includes("shouldUpdateCode"))
         {
           const userCode = await compileCpptoJS(g.userCode);
-          gNode.port.postMessage({ 
+
+          if (!userCode.error)
+          {
+            gNode.port.postMessage({ 
               type: "update",
               data: {codeData: JSON.stringify(userCode)}
-          });
+            });
+            gNode.port.onmessage = msg=>{
+              if (msg.type === "error")
+              {
+                setConsoleData("[" + g.id +  " ] Runtime error: " + userCode.data)
+              }
+            }
+          }
+          else
+          {
+            setConsoleData("[" + g.id +  " ] Compilation error: " + userCode.message)
+          }
+          
         }
         return null;
       },[]);
@@ -264,6 +281,8 @@ function App() {
         selectedPlugin={selectedPlugin}
         updatePlugin={updatePlugin}
         updateCode={updatedSelectedCode}/>
+      <Console
+        text={consoleData} />
     </div>
   );
 }

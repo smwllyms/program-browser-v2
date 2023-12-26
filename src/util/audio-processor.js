@@ -21,6 +21,7 @@ class MyAudioProcessor extends AudioWorkletProcessor {
    
     updateCodeData() {
 
+      try {
       this.runtimeData.functions = {};
 
       for (const f of Object.keys(this.codeData.functions))
@@ -36,6 +37,13 @@ class MyAudioProcessor extends AudioWorkletProcessor {
       this.runtimeData.globals = {};
       this.runtimeData.functions.__init = new Function("__globals", this.codeData.functions.__init.body);
       this.runtimeData.functions.__init(this.runtimeData.globals);
+    } 
+    catch (e) {
+      this.port.postMessage({
+        type: "error",
+        data: "Error while initializing FX: " + e 
+      })
+    }
     }
 
     processAudio(inputs, outputs) {
@@ -44,7 +52,15 @@ class MyAudioProcessor extends AudioWorkletProcessor {
         return true;
       }
 
-      this.runtimeData.functions.processAudio(inputs, outputs, this.runtimeData.functions, this.runtimeData.globals);
+      try {
+        this.runtimeData.functions.processAudio(inputs, outputs, this.runtimeData.functions, this.runtimeData.globals);
+      }
+      catch (e) {
+        this.port.postMessage({
+          type: "error",
+          data: "Error while processing audio: " + e 
+        })
+      }
       return true;
     }
 
