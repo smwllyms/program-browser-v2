@@ -48,7 +48,7 @@ export default function Destination(props)
             newCoords.y = Math.min(parentRect.height - myRect.height, newCoords.y);
 
             setCoordinates(newCoords);
-            props.updatePlugin(plugin, true)
+            props.updatePlugin(plugin, "metadata")
         } 
         ref.current.addEventListener("pointermove", onMove);
 
@@ -58,7 +58,7 @@ export default function Destination(props)
             ref.current.removeEventListener("pointerup", onUp);
 
             plugin.metadata.coordinates = coordinates;
-            props.updatePlugin(plugin, true)
+            props.updatePlugin(plugin, "metadata")
         }
         ref.current.addEventListener("pointerup", onUp);
 

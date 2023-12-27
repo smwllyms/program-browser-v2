@@ -45,7 +45,6 @@ function App() {
     {
       const newConfig = await loadConfig();
       newConfig.plugins.push(destinationNode);
-      console.log(newConfig)
       setConfig(newConfig);
       initialized.current = true;
     }
@@ -57,7 +56,6 @@ function App() {
   React.useEffect(() => {
 
     buildRoutesFuncRef.current = async ()=>{
-      console.log("Building routes")
 
       const generators = pluginList.filter(p=>p.type==="generator");
       const fx = pluginList.filter(p=>p.type==="fx");
@@ -88,19 +86,20 @@ function App() {
         if (!gNode)
         {
           gNode = await createAudioWorkletNode(audioContext);
-          console.log(gNode)
           _workletNodes[g.id] = gNode;
         }
 
-        if (g.directives.includes("shouldUpdateCode"))
+        if (g.directives.includes("updateCode"))
         {
           const userCode = await compileCpptoJS(g.userCode);
 
           if (!userCode.error)
           {
             gNode.port.postMessage({ 
-              type: "update",
-              data: {codeData: JSON.stringify(userCode)}
+              type: "updateCode",
+              data: {
+                codeData: JSON.stringify(userCode)
+              }
             });
             gNode.port.onmessage = msg=>{
               if (msg.type === "error")
@@ -114,6 +113,31 @@ function App() {
             setConsoleData("[" + g.id +  " ] Compilation error: " + userCode.message)
           }
           
+        }
+        else if (g.directives.includes("updateParameters"))
+        {
+          const userCode = await compileCpptoJS(g.userCode);
+
+          if (!userCode.error)
+          {
+            gNode.port.postMessage({ 
+              type: "updateParameters",
+              data: {
+                parameterData: JSON.stringify(g.parameters)
+              }
+            });
+            gNode.port.onmessage = msg=>{
+              if (msg.type === "error")
+              {
+                setConsoleData("[" + g.id +  " ] Runtime error: " + userCode.data)
+              }
+            }
+          }
+          else
+          {
+            setConsoleData("[" + g.id +  " ] Compilation error: " + userCode.message)
+          }
+
         }
         return null;
       },[]);
@@ -174,7 +198,6 @@ function App() {
   React.useEffect((e)=>{
     if (initialized.current === true)
     {
-      console.log("Updated routes detected")
       buildRoutesFuncRef.current();
     }
   }, [routes])
@@ -224,19 +247,21 @@ function App() {
     selectedPlugin.userCode = code;
     const newDate = new Date();
     selectedPlugin.lastUpdated = newDate;
-    selectedPlugin.directives.push("shouldUpdateCode");
     lastUpdated = newDate;
+    selectedPlugin.directives.push("updateCode");
     setPluginList([...pluginList.filter(p=>p.id !== selectedPlugin.id), selectedPlugin])
   }
 
-  function updatePlugin(plug, isMetaData)
+  function updatePlugin(plug, directive)
   {
     const plugin = pluginList.find(p=>p.id===plug.id);
-    if (!isMetaData)
+    console.log(directive)
+    if (directive !== "metadata")
     {
       const newDate = new Date();
       plugin.lastUpdated = newDate;
       lastUpdated = newDate;
+      plugin.directives.push(directive);
     }
     setPluginList([...pluginList.filter(p=>p.id !== plugin.id), plugin])
   }
@@ -325,7 +350,15 @@ function newFXPlugin()
     userCode: "// Create a process function (click load sample for an idea)",
     metadata: {
       coordinates: {x:0,y:0}
-    }
+    },
+    parameters: [
+      {
+        type: "decimal",
+        tag: "lfo-rate",
+        value: 0
+      }
+    ],
+    gui: defaultGUI()
   }
 }
 function newGeneratorPlugin()
@@ -357,6 +390,35 @@ function destination()
     lastUpdated: new Date(),
     metadata: {
       coordinates: {x:0,y:0}
+    }
+  }
+}
+
+function defaultGUI()
+{
+  return {
+    view: {
+      type: "view",
+      position: {
+        x: 0, y: 0
+      },
+      width: 400,
+      height: 200,
+      background: "#000000",
+      children: [
+        {
+          type: "slider",
+          tag: "lfo-rate",
+          position: {
+            x: 50, y: 50
+          },
+          width: 200,
+          granularity: 0,
+          default: 0.75,
+          min: -1,
+          max: 1
+        }
+      ]
     }
   }
 }

@@ -18,7 +18,8 @@ export default function Editor(props)
                 updateCode={updateCode}
                 updatePlugin={props.updatePlugin}/>
             <GUIEditor 
-                selectedPlugin={props.selectedPlugin}/>
+                selectedPlugin={props.selectedPlugin}
+                updatePlugin={props.updatePlugin}/>
         </div>
     )
 }

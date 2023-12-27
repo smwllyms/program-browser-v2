@@ -23,7 +23,7 @@ export default function CodeEditor(props)
 
         plugin.config.type = generatorTypeRef.current.value;
 
-        props.updatePlugin(plugin)
+        props.updatePlugin(plugin, "updateCode")
     }
 
     if (props.selectedPlugin && props.selectedPlugin.type === "fx")
@@ -63,7 +63,7 @@ export default function CodeEditor(props)
     }
     else
     {
-        return <h2>No Plugin Selected</h2>;
+        return <h2 style={{width: "50%"}}>No Plugin Selected</h2>;
     }
     
 }
