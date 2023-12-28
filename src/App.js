@@ -355,7 +355,11 @@ function newFXPlugin()
       {
         type: "decimal",
         tag: "lfo-rate",
-        value: 0
+        value: 0.75,
+        granularity: 0,
+        default: 0.75,
+        min: -1,
+        max: 1
       }
     ],
     gui: defaultGUI()
@@ -404,7 +408,7 @@ function defaultGUI()
       },
       width: 400,
       height: 200,
-      background: "#000000",
+      background: "#ffffff",
       children: [
         {
           type: "slider",
@@ -413,10 +417,6 @@ function defaultGUI()
             x: 50, y: 50
           },
           width: 200,
-          granularity: 0,
-          default: 0.75,
-          min: -1,
-          max: 1
         }
       ]
     }

@@ -47,6 +47,7 @@ export default function GUIEditor(props)
             return <GUIPreview
                 gui={props.selectedPlugin.gui}
                 parameters={props.selectedPlugin.parameters}
+                inEditMode={inEditMode}
                 handleModifyGUI={handleModifyGUI}
                 handleModifyParameter={handleModifyParameter} /> 
         }

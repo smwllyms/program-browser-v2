@@ -72,7 +72,6 @@ function sampleFXProgram()
 {
     return `\
 int num = 1;\n\
-float lfoRate = 1.0;\n\
 float half(float val)\n\
 {\n\
     return val / 2.0;\n\
@@ -92,7 +91,7 @@ void processAudio(float **inputs, float **outputs)\n\
             int len = input[j].length;\n\
             for (int k = 0; k < len; k++)\n\
             {\n\
-                output[j][k] = half(input[j][k]) * Math.sin(lfoRate * num / 10000);\n\
+                output[j][k] = half(input[j][k]) * Math.sin(num * parameters["lfo-rate"] / 10000);\n\
                 num++;\n
             }\n\
         }\n\
