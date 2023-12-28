@@ -8,6 +8,8 @@ class MyAudioProcessor extends AudioWorkletProcessor {
       this.runtimeData.functions = {};
       this.runtimeData.globals = {};
       this.parameters = {};
+      this.isBypassed = false;
+      this.mix = 1.0;
 
       this.port.onmessage = event => {
         const { type, data } = event.data;
@@ -20,6 +22,15 @@ class MyAudioProcessor extends AudioWorkletProcessor {
         else if (type === "updateParameters")
         {
           this.updateParameters(JSON.parse(data.parameterData));
+        }
+        else if (type === "setBypass")
+        {
+          console.log(data)
+          this.isBypassed = data;
+        }
+        else if (type === "updateMix")
+        {
+          this.mix = data;
         }
       };
     }
@@ -62,9 +73,55 @@ class MyAudioProcessor extends AudioWorkletProcessor {
     }
     }
 
+    bypass(inputs, outputs)
+    {
+
+      // Number of Inputs
+      for (let i = 0; i < inputs.length; i++)
+      {
+          const input = inputs[i];
+          const output = outputs[i];
+          // Number of channels
+          for (let j = 0; j < input.length; j++)
+          {
+              let len = input[j].length;
+              for (let k = 0; k < len; k++)
+              {
+                  output[j][k] = input[j][k];
+              }
+          }
+      }      
+    }
+
+    mixAudio(inputs, outputs)
+    {
+
+      // Number of Inputs
+      for (let i = 0; i < inputs.length; i++)
+      {
+          const input = inputs[i];
+          const output = outputs[i];
+          // Number of channels
+          for (let j = 0; j < input.length; j++)
+          {
+              let len = input[j].length;
+              for (let k = 0; k < len; k++)
+              {
+                  output[j][k] = this.mix * output[j][k] + (1.0 - this.mix) * input[j][k];
+              }
+          }
+      }      
+    }
+
     processAudio(inputs, outputs) {
 
       if (!this.runtimeData.functions.processAudio) {
+        return true;
+      }
+
+      if (this.isBypassed)
+      {
+        this.bypass(inputs, outputs);
         return true;
       }
 
@@ -75,8 +132,17 @@ class MyAudioProcessor extends AudioWorkletProcessor {
         this.port.postMessage({
           type: "error",
           data: "Error while processing audio: " + e 
-        })
+        });
+
+        this.bypass(inputs, outputs);
       }
+
+      // Now mix
+      if (this.mix !== 1.0)
+      {
+        this.mixAudio(inputs, outputs);
+      }
+
       return true;
     }
 

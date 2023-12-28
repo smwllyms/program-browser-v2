@@ -114,7 +114,7 @@ function App() {
           }
           
         }
-        else if (g.directives.includes("updateParameters"))
+        if (g.directives.includes("updateParameters"))
         {
           const userCode = await compileCpptoJS(g.userCode);
 
@@ -138,6 +138,20 @@ function App() {
             setConsoleData("[" + g.id +  " ] Compilation error: " + userCode.message)
           }
 
+        }
+        if (g.directives.includes("setBypass"))
+        {
+          gNode.port.postMessage({
+            type: "setBypass",
+            data: g.isBypassed
+          });
+        }
+        if (g.directives.includes("updateMix"))
+        {
+          gNode.port.postMessage({
+            type: "updateMix",
+            data: g.mix
+          });
         }
         return null;
       },[]);
@@ -347,6 +361,8 @@ function newFXPlugin()
     name: "TestFX",
     directives: [],
     lastUpdated: new Date(),
+    isBypassed: false,
+    mix: 1.0,
     userCode: "// Create a process function (click load sample for an idea)",
     metadata: {
       coordinates: {x:0,y:0}
