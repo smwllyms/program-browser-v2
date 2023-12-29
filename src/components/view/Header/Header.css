@@ -1,9 +1,52 @@
-.header
-{
+.header {
     width: 100%;
-    padding: 10px;
+    height: 50px;
+    background-color: grey;
+}
+.header * {
+    z-index: 9;
+}
+.header > div {
+    height: 100%;
+}
+.header nav {
+    padding:0;
+    margin:0;
+    height: 100%;
+}
+.header nav > ul {
+    padding: 0;
+    margin: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+}
+.header nav > ul > li {
+    height: 100%;
+    display: inline-block;
+    min-width: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+.header nav > ul > li > ul {
+    position: absolute;
+    left: 0;    
+    top: 100%;    
+    padding: 0;
+    margin: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+.header nav > ul > li > ul > li {
+    height: 100%;
+    display: inline-block;
+    min-width: 120px;
     box-sizing: border-box;
-
-    background-color: darkgray;
-    height: 40px;
+    padding: 10px;
+    position: relative;
+    background-color: darkgrey;
+    text-align: left    ;
 }
