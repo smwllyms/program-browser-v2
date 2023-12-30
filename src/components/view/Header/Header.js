@@ -40,6 +40,7 @@ export default function Header(props) {
                                 <ul>
                                     <li><a href="#newfx" onClick={props.addNewFXPlugin}>Add FX</a></li>
                                     <li><a href="#new-generator" onClick={props.addNewGeneratorPlugin}>Add Generator</a></li>
+                                    <li><a href="#remove" onClick={props.removePlugin}>Remove</a></li>
                                 </ul>
                             )}
                         </li>

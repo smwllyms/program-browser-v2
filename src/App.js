@@ -59,6 +59,7 @@ function App() {
 
       const generators = pluginList.filter(p=>p.type==="generator");
       const fx = pluginList.filter(p=>p.type==="fx");
+      const removedPlugins = [];
 
       let _workletNodes = {...workletNodesRef.current}
 
@@ -69,7 +70,34 @@ function App() {
       }
 
       generators.reduce((s,g)=>{
-        let gNode = _workletNodes[g.id]
+        let gNode = _workletNodes[g.id];
+
+        if (g.directives.includes("destroy"))
+        {
+          if (gNode)
+          {
+            // Delete worklet nodes
+            delete _workletNodes[g.id];
+            // Delete all outgoing routes
+            delete routes[g.id];
+            // Delete all incoming routes
+            for (const key of Object.keys(routes))
+            {
+              if (routes[key].includes(g.id))
+              {
+                routes[key] = routes[key].filter(r=>r !== g.id);
+              }
+            }
+          }
+
+          // Add to removed pluugins
+          removedPlugins.push(g.id);
+
+          // pass/skip any futher directives
+          return null;
+        }
+
+
         if (!gNode)
         {
           gNode = audioContext.createOscillator();
@@ -82,7 +110,33 @@ function App() {
       },[]);
 
       await fx.reduce(async (s,g)=>{
-        let gNode = _workletNodes[g.id]
+        let gNode = _workletNodes[g.id];
+
+        if (g.directives.includes("destroy"))
+        {
+          if (gNode)
+          {
+            // Delete worklet nodes
+            delete _workletNodes[g.id];
+            // Delete all outgoing routes
+            delete routes[g.id];
+            // Delete all incoming routes
+            for (const key of Object.keys(routes))
+            {
+              if (routes[key].includes(g.id))
+              {
+                routes[key] = routes[key].filter(r=>r !== g.id);
+              }
+            }
+          }
+
+          // Add to removed pluugins
+          removedPlugins.push(g.id);
+
+          // pass/skip any futher directives
+          return null;
+        }
+
         if (!gNode)
         {
           gNode = await createAudioWorkletNode(audioContext);
@@ -171,9 +225,12 @@ function App() {
       // Update worklet nodes
       workletNodesRef.current = _workletNodes;
 
+      // Update plugin list
+      const _pluginList = pluginList.filter(plugin=>!removedPlugins.includes(plugin.id));
+
       // Reset all plugin directives
-      pluginList.forEach(plugin=>plugin.directives = []);
-      setPluginList(pluginList);
+      _pluginList.forEach(plugin=>plugin.directives = []);
+      setPluginList(_pluginList);
     }
   });
 
@@ -242,6 +299,9 @@ function App() {
   }
 
 
+  // For component convenience
+  const selectedPlugin = pluginList.find(plugin=>plugin.id===selected);
+
   // New FX
   function addNewFXPlugin()
   {
@@ -252,9 +312,20 @@ function App() {
   {
     setPluginList([...pluginList, newGeneratorPlugin()])
   }
+  // Remove a plugin
+  function removePlugin()
+  {
+    if (!selectedPlugin || selectedPlugin.type === "destination")
+    {
+      return;
+    }
 
-  // For component convenience
-  const selectedPlugin = pluginList.find(plugin=>plugin.id===selected);
+    const newDate = new Date();
+    selectedPlugin.lastUpdated = newDate;
+    lastUpdated = newDate;
+    selectedPlugin.directives.push("destroy");
+    setPluginList([...pluginList.filter(p=>p.id !== selectedPlugin.id), selectedPlugin])
+  }
 
   function updatedSelectedCode(code)
   {
@@ -307,6 +378,7 @@ function App() {
       <Header 
         addNewFXPlugin={addNewFXPlugin}
         addNewGeneratorPlugin={addNewGeneratorPlugin}
+        removePlugin={removePlugin}
         selectedPlugin={selectedPlugin}/>
       <DragNDrop 
         selected={selected}
