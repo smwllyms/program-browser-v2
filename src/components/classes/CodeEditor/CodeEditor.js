@@ -14,7 +14,8 @@ export default function CodeEditor(props)
 
     function loadSample()
     {
-        textArea.current.value = sampleFXProgram();
+        // textArea.current.value = props.sampleFXProgram();
+        props.sampleFXProgram();
     }
 
     function modifyPlugin()
@@ -32,6 +33,7 @@ export default function CodeEditor(props)
             <div className="code-editor" key={props.selectedPlugin.id}>
                 <textarea 
                     ref={textArea}
+                    key={Math.random()}
                     defaultValue={props.selectedPlugin.userCode}>
 
                 </textarea>
@@ -66,36 +68,4 @@ export default function CodeEditor(props)
         return <h2 style={{width: "50%"}}>No Plugin Selected</h2>;
     }
     
-}
-
-function sampleFXProgram()
-{
-    return `\
-int num = 1;\n\
-float half(float val)\n\
-{\n\
-    return val / 2.0;\n\
-}\n\
-// Main processing function\n\
-void processAudio(float **inputs, float **outputs)\n\
-{\n\
-    // Number of Inputs\n\
-    for (int i = 0; i < inputs.length; i++)\n\
-    {\n\
-        float[] input = inputs[i];\n\
-        float[] output = outputs[i];\n\
-        // Number of channels\n\
-        for (int j = 0; j < input.length; j++)\n\
-        {\n\
-            // Play with samples here!\n\
-            int len = input[j].length;\n\
-            for (int k = 0; k < len; k++)\n\
-            {\n\
-                output[j][k] = half(input[j][k]) * Math.sin(num * parameters["lfo-rate"] / 10000);\n\
-                num++;\n
-            }\n\
-        }\n\
-    }\n\
-}\n
-    `;
 }

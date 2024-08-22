@@ -16,7 +16,8 @@ export default function Editor(props)
             <CodeEditor 
                 selectedPlugin={props.selectedPlugin}
                 updateCode={updateCode}
-                updatePlugin={props.updatePlugin}/>
+                updatePlugin={props.updatePlugin}
+                sampleFXProgram={props.sampleFXProgram}/>
             <GUIEditor 
                 selectedPlugin={props.selectedPlugin}
                 updatePlugin={props.updatePlugin}/>

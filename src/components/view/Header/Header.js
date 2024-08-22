@@ -7,11 +7,28 @@ export default function Header(props)
     return (
         <div className="header">
             <div style={{float:"left"}}>
-                <a href="#newfx" onClick={props.addNewFXPlugin}>Add FX</a>
-                <a href="#new-generator" onClick={props.addNewGeneratorPlugin}>Add Generator</a>
+                <ul className="header-menu">
+                    <li>Program Browser</li>
+                </ul>
+                <ul className="header-menu">
+                    <li>DragNDrop</li>
+                    <li><a href="#newfx" onClick={props.addNewFXPlugin}>Add FX</a></li>
+                    <li><a href="#new-generator" onClick={props.addNewGeneratorPlugin}>Add Generator</a></li>
+                </ul>
+                <ul className="header-menu">
+                    <li>GUI</li>
+                    <li className="submenu-parent">
+                        <ul className="subheader-menu">
+                            <li>Add...</li>
+                            <li><a href="#addGUIComponent" onClick={()=>props.addGUIParameter("slider")}>Slider</a></li>
+                            <li><a href="#addGUIComponent" onClick={()=>props.addGUIParameter("label")}>Label</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="#new-generator" onClick={props.deleteGUIParameter}>Delete</a></li>
+                </ul>
             </div>
             <div style={{float:"right"}}>
-                <span>Currently selected: {name}</span>
+                <span className="selected">Currently selected: {name}</span>
             </div>
             
         </div>

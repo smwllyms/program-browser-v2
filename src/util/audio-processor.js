@@ -25,7 +25,6 @@ class MyAudioProcessor extends AudioWorkletProcessor {
         }
         else if (type === "setBypass")
         {
-          console.log(data)
           this.isBypassed = data;
         }
         else if (type === "updateMix")
@@ -33,6 +32,7 @@ class MyAudioProcessor extends AudioWorkletProcessor {
           this.mix = data;
         }
       };
+
     }
 
     updateParameters(parameterData) {
@@ -41,7 +41,8 @@ class MyAudioProcessor extends AudioWorkletProcessor {
 
       for (const param of parameterData)
       {
-        this.parameters[param.tag] = param.value;
+        let scale = param.max - param.min;
+        this.parameters[param.tag] = param.value * scale - param.min;
       }
 
     }

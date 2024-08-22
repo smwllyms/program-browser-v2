@@ -59,16 +59,16 @@ export default function GUIEditor(props)
         {
             return (
                 <div>
-                    <input 
+                    Mix: <input 
                         type="range"
                         min="0"
                         max="9999"
                         value={Math.round(9999 * props.selectedPlugin.mix)}
-                        onChange={handleUpdateMix} />
-                    <input
+                        onChange={handleUpdateMix} /><br/>
+                    Bypassed: <input
                         type="checkbox"
                         value={props.selectedPlugin.isBypassed}
-                        onChange={handleSetIsBypassed} />
+                        onChange={handleSetIsBypassed} /><br/>
                     <GUIPreview
                         gui={props.selectedPlugin.gui}
                         parameters={props.selectedPlugin.parameters}

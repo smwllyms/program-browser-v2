@@ -27,17 +27,25 @@ export default function GUIPreview(props)
         // Derive normalized value
         let param = parameterData.find(p=>p.tag === tag);
 
-        if (param.type === "decimal")
-        {
-            let normalizedValue = e.target.value / otherData.granularity;
-            // console.log(normalizedValue)
-            props.handleModifyParameter(tag, normalizedValue);
+        if (param) {
+            if (param.type === "decimal")
+            {
+                let normalizedValue = e.target.value / otherData.granularity;
+                // console.log(normalizedValue)
+                props.handleModifyParameter(tag, normalizedValue);
+            }
+        }
+        else {
+            if (id === "label") {
+                const elem = Object.values(elemMap).find( e2 => e2.id === tag);
+                elem.text = e.target.innerText;
+                props.handleModifyGUI(guiData, false);
+            }
         }
     }
 
     function handlePointerDown(e, elem)
     {
-        console.log("down")
         canDrag = true;
         lastPos = {x: e.clientX, y: e.clientY};
         setSelectedElem(elem);
@@ -45,7 +53,6 @@ export default function GUIPreview(props)
 
     function handlePointerUp(e)
     {
-        console.log("up")
         canDrag = false;
     }
     if (!eventSetup)
@@ -84,9 +91,19 @@ export default function GUIPreview(props)
 
         elemMap[id] = elem;
 
+        // Get parent
+        let parent = elemMap[elem.parentid] || {
+            position: {
+                x: 0,
+                y: 0
+            }
+            
+        }
+
+
         style.position = "absolute";
-        style.left = elem["position"].x + "px"
-        style.top = elem["position"].y + "px"
+        style.left = parent["position"].x + elem["position"].x + "px"
+        style.top = parent["position"].y + elem["position"].y + "px"
 
         if (inEditMode && selectedElem && elem.tag === selectedElem.tag)
         {
@@ -136,6 +153,25 @@ export default function GUIPreview(props)
                 parentid={elem.parentid} />)
 
         }
+        else if (elem.type === "label")
+        {
+            const otherData = {
+            }
+
+            arr.push( <span
+                style={style}
+                disabled={inEditMode}
+                contentEditable={inEditMode}
+                onInput={e=>handleChange(e, elem.type, elem.id, otherData)}
+                onPointerDown={e=>handlePointerDown(e,  elem)}
+                onPointerMove={e=>onPointerMove(e, id)}
+                suppressContentEditableWarning={true}
+                key={id}
+                parentid={elem.parentid}>
+                    {elem.text}
+                </span>)
+
+        }
 
 
         // Recursive depth first search
@@ -154,16 +190,17 @@ export default function GUIPreview(props)
         let result = [];
         view.parentid = -1;
         buildGUIRecursive(view, result);
-        let elems = [];
+        // let elems = [];
 
-        for (const e in result)
-        {
-            const children = elems.filter(e2=>e2.props.parentid === result[e].key);
-            let cloneElem = React.cloneElement(result[e], {}, children.length > 0 ? children : undefined);
-            elems.push(cloneElem);
-        }
+        // for (const e in result)
+        // {
+        //     const children = elems.filter(e2=>e2.props.parentid === result[e].key);
+        //     let cloneElem = React.cloneElement(result[e], {}, children.length > 0 ? children : undefined);
 
-        return elems;
+        //     elems.push(cloneElem);
+        // }
+
+        return result;
     }
 
     return (

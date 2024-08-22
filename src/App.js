@@ -95,14 +95,14 @@ function App() {
 
           if (!userCode.error)
           {
-            gNode.port.postMessage({ 
+              gNode.port.postMessage({ 
               type: "updateCode",
               data: {
                 codeData: JSON.stringify(userCode)
               }
             });
             gNode.port.onmessage = msg=>{
-              if (msg.type === "error")
+              if (msg.data.type === "error")
               {
                 setConsoleData("[" + g.id +  " ] Runtime error: " + userCode.data)
               }
@@ -120,14 +120,14 @@ function App() {
 
           if (!userCode.error)
           {
-            gNode.port.postMessage({ 
+              gNode.port.postMessage({ 
               type: "updateParameters",
               data: {
                 parameterData: JSON.stringify(g.parameters)
               }
             });
             gNode.port.onmessage = msg=>{
-              if (msg.type === "error")
+              if (msg.data.type === "error")
               {
                 setConsoleData("[" + g.id +  " ] Runtime error: " + userCode.data)
               }
@@ -201,7 +201,6 @@ function App() {
       }
       if (shouldBuild)
       {
-        console.log("should build")
         buildRoutesFuncRef.current();
       }
     }
@@ -253,8 +252,74 @@ function App() {
     setPluginList([...pluginList, newGeneratorPlugin()])
   }
 
+  
+
   // For component convenience
   const selectedPlugin = pluginList.find(plugin=>plugin.id===selected);
+
+
+  // New GUI Parameter
+  function addGUIParameter(type)
+  {
+    console.log(selected)
+    if (selected !== "-1")
+    {
+
+      const plugin = selectedPlugin;
+      // console.log(selected)
+      // console.log(selectedPlugin)
+      let childParam = null;
+      let childGUI = null;
+
+      let pNum = plugin.gui.view.children.length;
+
+      switch (type)
+      {
+        case "label":
+          childGUI = {
+            id: v4().toString(),
+            type: "label",
+            position: {
+              x: 50, y: 50
+            },
+            width: 200,
+            text:"Change me!"
+          }
+          break;
+        default:
+          childParam = {
+            type: "decimal",
+            tag: "param"+pNum,
+            value: 0.75,
+            granularity: 0,
+            default: 0.75,
+            min: -1,
+            max: 1
+          }
+          childGUI = {
+            id: v4().toString(),
+            type: "slider",
+            tag: "param"+pNum,
+            position: {
+              x: 50, y: 50
+            },
+            width: 200,
+          }
+          break;
+      }
+
+      plugin.gui.view.children.push(childGUI);
+      if (childParam != null)
+        plugin.parameters.push(childParam);
+
+      updatePlugin(plugin, "gui")
+    }
+  }
+
+  function deleteGUIParameter() {
+    // selectedPlugin.gui.view.children = selectedPlugin.gui.view.children.filter(c => c.id !== lastModifiedGUIId);
+    updatePlugin(selectedPlugin, "gui")
+  }
 
   function updatedSelectedCode(code)
   {
@@ -269,7 +334,7 @@ function App() {
   function updatePlugin(plug, directive)
   {
     const plugin = pluginList.find(p=>p.id===plug.id);
-    console.log(directive)
+    // console.log(directive)
     if (directive !== "metadata")
     {
       const newDate = new Date();
@@ -289,6 +354,7 @@ function App() {
 
     setRoutes(_routes);
   }
+
   function removeRoute(source, destination)
   {
     const _routes = {...routes};
@@ -302,12 +368,19 @@ function App() {
     setRoutes(_routes);
   }
 
+  function sampleFXProgram() {
+    selectedPlugin.gui = defaultGUI();
+    updatedSelectedCode(sampleFXProgramCode())
+  }
+
   return (
     <div className="App">
       <Header 
         addNewFXPlugin={addNewFXPlugin}
         addNewGeneratorPlugin={addNewGeneratorPlugin}
-        selectedPlugin={selectedPlugin}/>
+        addGUIParameter={addGUIParameter}
+        selectedPlugin={selectedPlugin}
+        deleteGUIParameter={deleteGUIParameter}/>
       <DragNDrop 
         selected={selected}
         selectPlugin={select}
@@ -319,7 +392,8 @@ function App() {
       <Editor 
         selectedPlugin={selectedPlugin}
         updatePlugin={updatePlugin}
-        updateCode={updatedSelectedCode}/>
+        updateCode={updatedSelectedCode}
+        sampleFXProgram={sampleFXProgram}/>
       <Console
         text={consoleData} />
     </div>
@@ -378,7 +452,7 @@ function newFXPlugin()
         max: 1
       }
     ],
-    gui: defaultGUI()
+    gui: emptyGUI()
   }
 }
 function newGeneratorPlugin()
@@ -414,6 +488,22 @@ function destination()
   }
 }
 
+function emptyGUI()
+{
+  return {
+    view: {
+      type: "view",
+      position: {
+        x: 0, y: 0
+      },
+      width: 400,
+      height: 200,
+      background: "#ffffff",
+      children: []
+    }
+  }
+}
+
 function defaultGUI()
 {
   return {
@@ -427,16 +517,58 @@ function defaultGUI()
       background: "#ffffff",
       children: [
         {
+          id: v4().toString(),
           type: "slider",
           tag: "lfo-rate",
           position: {
             x: 50, y: 50
           },
           width: 200,
+        },
+        {
+          id: v4().toString(),
+          type: "label",
+          position: {
+            x: 50, y: 70
+          },
+          width: 200,
+          text:"A label for lfo-rate"
         }
       ]
     }
   }
+}
+
+function sampleFXProgramCode()
+{
+    return `\
+int num = 1;\n\
+float half(float val)\n\
+{\n\
+    return val / 2.0;\n\
+}\n\
+// Main processing function\n\
+void processAudio(float **inputs, float **outputs)\n\
+{\n\
+    // Number of Inputs\n\
+    for (int i = 0; i < inputs.length; i++)\n\
+    {\n\
+        float[] input = inputs[i];\n\
+        float[] output = outputs[i];\n\
+        // Number of channels\n\
+        for (int j = 0; j < input.length; j++)\n\
+        {\n\
+            // Play with samples here!\n\
+            int len = input[j].length;\n\
+            for (int k = 0; k < len; k++)\n\
+            {\n\
+                output[j][k] = half(input[j][k]) * Math.sin(num * parameters["lfo-rate"] / 10000);\n\
+                num++;\n
+            }\n\
+        }\n\
+    }\n\
+}\n
+    `;
 }
 
 export default App;
