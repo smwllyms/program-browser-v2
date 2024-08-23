@@ -72,7 +72,9 @@ function App() {
       generators.reduce((s,g)=>{
         let gNode = _workletNodes[g.id];
 
-        if (g.directives.includes("destroy"))
+        const directiveNames = g.directives.map(d => d.directive);
+
+        if (directiveNames.includes("destroy"))
         {
           if (gNode)
           {
@@ -112,7 +114,9 @@ function App() {
       await fx.reduce(async (s,g)=>{
         let gNode = _workletNodes[g.id];
 
-        if (g.directives.includes("destroy"))
+        const directiveNames = g.directives.map(d => d.directive);
+
+        if (directiveNames.includes("destroy"))
         {
           if (gNode)
           {
@@ -143,7 +147,7 @@ function App() {
           _workletNodes[g.id] = gNode;
         }
 
-        if (g.directives.includes("updateCode"))
+        if (directiveNames.includes("updateCode"))
         {
           const userCode = await compileCpptoJS(g.userCode);
 
@@ -168,7 +172,7 @@ function App() {
           }
           
         }
-        if (g.directives.includes("updateParameters"))
+        if (directiveNames.includes("updateParameters"))
         {
           const userCode = await compileCpptoJS(g.userCode);
 
@@ -189,23 +193,46 @@ function App() {
           }
           else
           {
+            gNode.port.postMessage({ 
+              type: "updateParameters",
+              data: {
+                parameterData: JSON.stringify(g.parameters)
+              }});
             setConsoleData("[" + g.id +  " ] Compilation error: " + userCode.message)
           }
 
         }
-        if (g.directives.includes("setBypass"))
+        if (directiveNames.includes("setBypass"))
         {
           gNode.port.postMessage({
             type: "setBypass",
             data: g.isBypassed
           });
         }
-        if (g.directives.includes("updateMix"))
+        if (directiveNames.includes("updateMix"))
         {
           gNode.port.postMessage({
             type: "updateMix",
             data: g.mix
           });
+        }
+        if (directiveNames.includes("updateTag"))
+        {
+          const otherData = g.directives.find(d=>d.directive === "updateTag").otherData;
+          gNode.port.postMessage({
+            type: "updateTag",
+            data: {
+              oldTag: otherData.oldTag,
+              newTag: otherData.newTag
+            }
+          });
+        }
+        if (directiveNames.includes("gui")) {
+          gNode.port.postMessage({ 
+            type: "updateParameters",
+            data: {
+              parameterData: JSON.stringify(g.parameters)
+            }});
         }
         return null;
       },[]);
@@ -382,11 +409,11 @@ function App() {
     const newDate = new Date();
     selectedPlugin.lastUpdated = newDate;
     lastUpdated = newDate;
-    selectedPlugin.directives.push("updateCode");
+    selectedPlugin.directives.push({directive:"updateCode"});
     setPluginList([...pluginList.filter(p=>p.id !== selectedPlugin.id), selectedPlugin])
   }
 
-  function updatePlugin(plug, directive)
+  function updatePlugin(plug, directive, otherData)
   {
     const plugin = pluginList.find(p=>p.id===plug.id);
     // console.log(directive)
@@ -395,7 +422,7 @@ function App() {
       const newDate = new Date();
       plugin.lastUpdated = newDate;
       lastUpdated = newDate;
-      plugin.directives.push(directive);
+      plugin.directives.push({directive:directive, otherData:otherData});
     }
     setPluginList([...pluginList.filter(p=>p.id !== plugin.id), plugin])
   }
@@ -425,6 +452,17 @@ function App() {
 
   function sampleFXProgram() {
     selectedPlugin.gui = defaultGUI();
+    selectedPlugin.parameters = [
+      {
+        type: "decimal",
+        tag: "lfo-rate",
+        value: 0.75,
+        granularity: 0,
+        default: 0.75,
+        min: -1,
+        max: 1
+      }
+    ]
     updatedSelectedCode(sampleFXProgramCode())
   }
 
@@ -497,15 +535,6 @@ function newFXPlugin()
       coordinates: {x:0,y:0}
     },
     parameters: [
-      {
-        type: "decimal",
-        tag: "lfo-rate",
-        value: 0.75,
-        granularity: 0,
-        default: 0.75,
-        min: -1,
-        max: 1
-      }
     ],
     gui: emptyGUI()
   }

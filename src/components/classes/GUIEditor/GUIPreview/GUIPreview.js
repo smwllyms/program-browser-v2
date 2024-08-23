@@ -27,6 +27,12 @@ export default function GUIPreview(props)
         // Derive normalized value
         let param = parameterData.find(p=>p.tag === tag);
 
+        if (otherData && otherData.changeTag) {
+
+            props.handleModifyTag(tag, e.target.value);
+            return;
+        }
+
         if (param) {
             if (param.type === "decimal")
             {
@@ -130,28 +136,30 @@ export default function GUIPreview(props)
         else if (elem.type === "slider")
         {
             let param = parameterData.find(p=>p.tag === elem.tag);
-            const otherData = {
-                range: param.max - param.min,
-                granularity: param.granularity === 0 ? 9999 : param.granularity,
-                min: param.min,
-                max: param.max,
-                default: param.default
+
+            if (param) {
+                const otherData = {
+                    range: param.max - param.min,
+                    granularity: param.granularity === 0 ? 9999 : param.granularity,
+                    min: param.min,
+                    max: param.max,
+                    default: param.default
+                }
+    
+    
+                arr.push( <input
+                    type="range"
+                    min={0}
+                    max={otherData.max * otherData.granularity}
+                    defaultValue={otherData.default * otherData.granularity}
+                    style={style}
+                    onPointerDown={e=>handlePointerDown(e,  elem)}
+                    onPointerMove={e=>onPointerMove(e, id)}
+                    disabled={inEditMode}
+                    onChange={e=>handleChange(e, elem.type, elem.tag, otherData)}
+                    key={id}
+                    parentid={elem.parentid} />)    
             }
-
-
-            arr.push( <input
-                type="range"
-                min={0}
-                max={otherData.max * otherData.granularity}
-                defaultValue={otherData.default * otherData.granularity}
-                style={style}
-                onPointerDown={e=>handlePointerDown(e,  elem)}
-                onPointerMove={e=>onPointerMove(e, id)}
-                disabled={inEditMode}
-                onChange={e=>handleChange(e, elem.type, elem.tag, otherData)}
-                key={id}
-                parentid={elem.parentid} />)
-
         }
         else if (elem.type === "label")
         {
@@ -204,8 +212,21 @@ export default function GUIPreview(props)
     }
 
     return (
+        <>
+        {
+            (inEditMode && selectedElem && selectedElem.tag) ? (
+                <>
+                    Tag: <input
+                    type="text"
+                    value={selectedElem.tag}
+                    onInput={e=>handleChange(e, selectedElem.type, selectedElem.tag, {changeTag:true})} />
+                </>
+            ) : <></>
+        }
         <div className="gui-preview">
             {buildGUI(viewData)}
         </div>
+        </>
+        
     )
 }

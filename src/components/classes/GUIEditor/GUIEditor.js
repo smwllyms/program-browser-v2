@@ -39,6 +39,24 @@ export default function GUIEditor(props)
         plugin.parameters = params;
         props.updatePlugin(plugin, "updateParameters");
     }
+    function handleModifyTag(tagName, newValue)
+    {
+        const plugin = props.selectedPlugin;
+        const params = plugin.parameters;
+
+        const param = params.find(p=>p.tag===tagName);
+        const oldTag = param.tag;
+        param.tag = newValue;
+
+        const gui = plugin.gui;
+
+        const paramGUI = gui.view.children.find(c => c.tag === tagName);
+        paramGUI.tag = newValue;
+
+        plugin.parameters = params;
+        plugin.gui = gui;
+        props.updatePlugin(plugin, "updateTag", {oldTag: tagName, newTag: newValue});
+    }
 
     function handleUpdateMix(e)
     {
@@ -73,8 +91,9 @@ export default function GUIEditor(props)
                         gui={props.selectedPlugin.gui}
                         parameters={props.selectedPlugin.parameters}
                         inEditMode={inEditMode}
+                        handleModifyTag={handleModifyTag}
                         handleModifyGUI={handleModifyGUI}
-                        handleModifyParameter={handleModifyParameter} /> 
+                        handleModifyParameter={handleModifyParameter} />
                 </div>
                 
             );

@@ -31,6 +31,13 @@ class MyAudioProcessor extends AudioWorkletProcessor {
         {
           this.mix = data;
         }
+        else if (type === "updateTag")
+        {
+          const val = this.parameters[data.oldTag];
+          delete this.parameters[data.oldTag];
+          this.parameters[data.newTag] = val;
+          console.log(this.parameters)
+        }
       };
 
     }
