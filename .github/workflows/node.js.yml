@@ -1,0 +1,8 @@
+            - name: React Deploy - Github Pages
+  # You may pin to the exact commit or the version.
+  # uses: fcodelabs/react-deploy-github-pages-action@cfa9b7337e4e6222a882b9446c8200b865470f64
+  uses: fcodelabs/react-deploy-github-pages-action@v1.0.0
+  with:
+    # Build directory to deploy
+    build_dir: 
+          /gh-pages/
