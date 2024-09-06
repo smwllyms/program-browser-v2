@@ -4,7 +4,7 @@ import React from "react"
 
 export default function Header(props) {
 
-    const selected = props.selectedPlugin;
+    const selected = props.selectedPlugin; 
     const name = selected ? selected.name : "None";
 
     return (
