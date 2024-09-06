@@ -45,7 +45,7 @@ export default function GUIEditor(props)
         const params = plugin.parameters;
 
         const param = params.find(p=>p.tag===tagName);
-        const oldTag = param.tag;
+        // const oldTag = param.tag;
         param.tag = newValue;
 
         const gui = plugin.gui;

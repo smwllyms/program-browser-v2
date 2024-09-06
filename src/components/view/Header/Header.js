@@ -3,10 +3,6 @@ import "./Header.css"
 import React from "react"
 
 export default function Header(props) {
-    const [showFileSubmenu, setShowFileSubmenu] =  React.useState(false);
-    const [showEditSubmenu, setShowEditSubmenu] =  React.useState(false);
-    const [showPluginSubmenu, setShowPluginSubmenu] =  React.useState(false);
-    const [showGUISubmenu, setShowGUISubmenu] = React.useState(false);
 
     const selected = props.selectedPlugin;
     const name = selected ? selected.name : "None";
