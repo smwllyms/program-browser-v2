@@ -112,9 +112,13 @@ function App() {
       },[]);
 
       await fx.reduce(async (s,g)=>{
+
         let gNode = _workletNodes[g.id];
 
         const directiveNames = g.directives.map(d => d.directive);
+
+        console.log(g)
+        console.log(gNode)
 
         if (directiveNames.includes("destroy"))
         {
@@ -145,10 +149,14 @@ function App() {
         {
           gNode = await createAudioWorkletNode(audioContext);
           _workletNodes[g.id] = gNode;
+
+          // Set initial parameters
+          directiveNames.push("updateParameters")
         }
 
         if (directiveNames.includes("updateCode"))
         {
+          console.log(1)
           const userCode = await compileCpptoJS(g.userCode);
 
           if (!userCode.error)
@@ -174,6 +182,7 @@ function App() {
         }
         if (directiveNames.includes("updateParameters"))
         {
+          console.log(2)
           const userCode = await compileCpptoJS(g.userCode);
 
           if (!userCode.error)
