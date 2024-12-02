@@ -147,11 +147,11 @@ function App() {
 
         if (!gNode)
         {
+          console.log("New node detected")
           gNode = await createAudioWorkletNode(audioContext);
           _workletNodes[g.id] = gNode;
 
-          // Set initial parameters
-          directiveNames.push("updateParameters")
+          // Do not change parameters because we havent saved
         }
 
         if (directiveNames.includes("updateCode"))
@@ -160,18 +160,22 @@ function App() {
 
           if (!userCode.error)
           {
-              gNode.port.postMessage({ 
+            gNode.port.postMessage({ 
               type: "updateCode",
               data: {
                 codeData: JSON.stringify(userCode)
               }
             });
+
             gNode.port.onmessage = msg=>{
               if (msg.data.type === "error")
               {
                 setConsoleData("[" + g.id +  " ] Runtime error: " + userCode.data)
               }
             }
+
+            // Update parameters since code has changed
+            directiveNames.push("updateParameters")
           }
           else
           {
@@ -181,10 +185,7 @@ function App() {
         }
         if (directiveNames.includes("updateParameters"))
         {
-          const userCode = await compileCpptoJS(g.userCode);
-
-          if (!userCode.error)
-          {
+          // Choice: dont check for compiler errors
               gNode.port.postMessage({ 
               type: "updateParameters",
               data: {
@@ -194,19 +195,10 @@ function App() {
             gNode.port.onmessage = msg=>{
               if (msg.data.type === "error")
               {
-                setConsoleData("[" + g.id +  " ] Runtime error: " + userCode.data)
+                setConsoleData("[" + g.id +  " ] Runtime error: " + msg.data.data)
               }
             }
-          }
-          else
-          {
-            gNode.port.postMessage({ 
-              type: "updateParameters",
-              data: {
-                parameterData: JSON.stringify(g.parameters)
-              }});
-            setConsoleData("[" + g.id +  " ] Compilation error: " + userCode.message)
-          }
+          
 
         }
         if (directiveNames.includes("setBypass"))
