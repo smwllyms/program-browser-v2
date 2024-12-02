@@ -156,7 +156,6 @@ function App() {
 
         if (directiveNames.includes("updateCode"))
         {
-          console.log(1)
           const userCode = await compileCpptoJS(g.userCode);
 
           if (!userCode.error)
@@ -182,7 +181,6 @@ function App() {
         }
         if (directiveNames.includes("updateParameters"))
         {
-          console.log(2)
           const userCode = await compileCpptoJS(g.userCode);
 
           if (!userCode.error)

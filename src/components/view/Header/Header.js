@@ -14,7 +14,7 @@ export default function Header(props) {
                     <li>Program Browser</li>
                 </ul>
                 <ul className="header-menu">
-                    <li>DragNDrop</li>
+                    <li>Audio</li>
                     <li><a href="#newfx" onClick={props.addNewFXPlugin}>Add FX</a></li>
                     <li><a href="#new-generator" onClick={props.addNewGeneratorPlugin}>Add Generator</a></li>
                 </ul>
