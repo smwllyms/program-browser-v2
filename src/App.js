@@ -484,6 +484,9 @@ function App() {
 
     audioContext.resume();
 
+    // todo
+    saveState();
+
     // Add Generator Plugin
     const gen = newGeneratorPlugin();
 
