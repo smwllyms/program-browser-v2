@@ -14,7 +14,7 @@ import compileCpptoJS from "./util/cpp2js/main.js"
 
 const processorURL = URL.createObjectURL(new Blob([processorText], { type: 'text/javascript' }));
 
-const audioContext = new AudioContext();
+let audioContext = new AudioContext();
 async function createAudioWorkletNode(audioContext) {
   await audioContext.audioWorklet.addModule(processorURL);
   return new AudioWorkletNode(audioContext, 'my-audio-processor');
@@ -35,7 +35,8 @@ function App() {
   const [routes, setRoutes] = React.useState({});
   const [consoleData, setConsoleData] = React.useState(null);
   
-  const workletNodesRef = React.useRef({[destinationNode.id]:audioContext.destination});
+  // const workletNodesRef = React.useRef({[destinationNode.id]:audioContext.destination});
+  const workletNodesRef = React.useRef({});
   const buildRoutesFuncRef = React.useRef(null);
 
   // Initialize
@@ -59,6 +60,7 @@ function App() {
 
       const generators = pluginList.filter(p=>p.type==="generator");
       const fx = pluginList.filter(p=>p.type==="fx");
+      const dst = pluginList.filter(p=>p.type==="destination")[0];
       const removedPlugins = [];
 
       let _workletNodes = {...workletNodesRef.current}
@@ -68,6 +70,9 @@ function App() {
       {
         node.disconnect();
       }
+
+      // Set destination
+      _workletNodes[dst.id] ||= audioContext.destination;
 
       generators.reduce((s,g)=>{
         let gNode = _workletNodes[g.id];
@@ -116,9 +121,6 @@ function App() {
         let gNode = _workletNodes[g.id];
 
         const directiveNames = g.directives.map(d => d.directive);
-
-        console.log(g)
-        console.log(gNode)
 
         if (directiveNames.includes("destroy"))
         {
@@ -236,7 +238,8 @@ function App() {
         return null;
       },[]);
 
-      // Now connect routes
+      // Now connect web audio api routes
+
       for (const source of Object.keys(routes))
       {
         for (const destination of routes[source])
@@ -300,10 +303,20 @@ function App() {
 
   // Handle Update Config
   React.useEffect(()=>{
+
+    // Destroy old context
+    audioContext.close();
+    audioContext = new AudioContext();
+
     if (initialized.current === true) 
     {
       setSelected(config.currentSelected);
       setPluginList(config.plugins);
+      setRoutes(config.routes);
+    }
+    else {
+      // Initially we have to register node
+      workletNodesRef.current = {[destinationNode.id]:audioContext.destination};
     }
     
   }, [config]);
@@ -449,9 +462,36 @@ function App() {
     setRoutes(_routes);
   }
 
+  async function saveState() {
+
+    return JSON.stringify(config);
+  }
+
+  function loadState(stateJSONStr) {
+
+    try {
+      const state = JSON.parse(stateJSONStr);
+
+      workletNodesRef.current = {};
+      setConfig(state);
+    }
+    catch(e) {
+      console.log(e)
+    }
+  }
+
   function sampleFXProgram() {
-    selectedPlugin.gui = defaultGUI();
-    selectedPlugin.parameters = [
+
+    audioContext.resume();
+
+    // Add Generator Plugin
+    const gen = newGeneratorPlugin();
+
+    // Add FXplugin
+    const newFX = newFXPlugin();
+
+    newFX.gui = defaultGUI();
+    newFX.parameters = [
       {
         type: "decimal",
         tag: "lfo-rate",
@@ -462,12 +502,30 @@ function App() {
         max: 1
       }
     ]
-    updatedSelectedCode(sampleFXProgramCode())
+    newFX.userCode = sampleFXProgramCode();
+    newFX.metadata.coordinates.x = 175;
+
+    const dest = destination();
+    dest.metadata.coordinates.x = 350;
+
+    const sampleState = {
+      lastUpdated: new Date(),
+      currentSelected: "-1", // would be id
+      routes: {
+        [gen.id]: [newFX.id],
+        [newFX.id]: [dest.id]
+      },
+      plugins: [gen, newFX, dest]
+    }
+
+    loadState(JSON.stringify(sampleState));
+    // updatedSelectedCode(sampleFXProgramCode())
   }
 
   return (
     <div className="App">
       <Header 
+        sampleFXProgram={sampleFXProgram}
         addNewFXPlugin={addNewFXPlugin}
         addNewGeneratorPlugin={addNewGeneratorPlugin}
         addGUIParameter={addGUIParameter}
@@ -485,7 +543,7 @@ function App() {
         selectedPlugin={selectedPlugin}
         updatePlugin={updatePlugin}
         updateCode={updatedSelectedCode}
-        sampleFXProgram={sampleFXProgram}/>
+        />
       <Console
         text={consoleData} />
     </div>
@@ -515,7 +573,8 @@ function newConfig()
   return {
     lastUpdated: new Date(),
     currentSelected: "-1", // would be id
-    plugins: []
+    plugins: [],
+    routes: {}
   }
 }
 

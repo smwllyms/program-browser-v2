@@ -12,12 +12,6 @@ export default function CodeEditor(props)
         props.updateCode(textArea.current.value);
     }
 
-    function loadSample()
-    {
-        // textArea.current.value = props.sampleFXProgram();
-        props.sampleFXProgram();
-    }
-
     function modifyPlugin()
     {
         const plugin = {...props.selectedPlugin};
@@ -38,7 +32,6 @@ export default function CodeEditor(props)
 
                 </textarea>
                 <div>
-                    <a href="#load-sample" onClick={loadSample}>Load Sample</a>
                     <a href="#compile" onClick={compile}>Save & Compile</a>
                 </div>
             </div>

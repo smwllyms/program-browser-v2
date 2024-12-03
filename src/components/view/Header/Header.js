@@ -14,9 +14,9 @@ export default function Header(props) {
                     <li>Program Browser</li>
                 </ul>
                 <ul className="header-menu">
-                    <li>Audio</li>
-                    <li><a href="#newfx" onClick={props.addNewFXPlugin}>Add FX</a></li>
-                    <li><a href="#new-generator" onClick={props.addNewGeneratorPlugin}>Add Generator</a></li>
+                    <li>New Node</li>
+                    <li><a href="#newfx" onClick={props.addNewFXPlugin}>Effect</a></li>
+                    <li><a href="#new-generator" onClick={props.addNewGeneratorPlugin}>Generator</a></li>
                 </ul>
                 <ul className="header-menu">
                     <li>GUI</li>
@@ -28,6 +28,10 @@ export default function Header(props) {
                         </ul>
                     </li>
                     <li><a href="#new-generator" onClick={props.deleteGUIParameter}>Delete</a></li>
+                </ul>
+                <ul className="header-menu">
+                    <li>Help</li>
+                    <li><a href="#demo" onClick={props.sampleFXProgram}>Load Demo</a></li>
                 </ul>
             </div>
             <div style={{float:"right"}}>
