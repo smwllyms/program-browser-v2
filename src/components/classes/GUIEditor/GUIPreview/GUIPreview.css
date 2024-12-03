@@ -1,9 +1,0 @@
-.gui-preview
-{
-    margin-top:20px;
-    position: relative;
-}
-.gui-preview > div {
-    box-shadow: 2px 2px 2px rgb(143, 99, 99);
-
-}
